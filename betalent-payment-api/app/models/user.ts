@@ -18,7 +18,7 @@ export default class User extends compose(BaseModel, withAuthFinder(hash)) {
   @column({ serializeAs: null })
   declare password: string
 
-  // Nossa coluna adicionada para os Níveis 2 e 3 do desafio!
+  
   @column()
   declare role: string
 

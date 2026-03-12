@@ -1,13 +1,13 @@
 import vine from '@vinejs/vine'
 
 /**
- * Shared rules for email and password.
+ * Regras compartilhadas para e-mail e senha.
  */
 const email = () => vine.string().email().maxLength(254)
 const password = () => vine.string().minLength(8).maxLength(32)
 
 /**
- * Validator to use when performing self-signup
+ * Validador a ser usado ao realizar o auto-cadastro
  */
 export const signupValidator = vine.create({
   fullName: vine.string().nullable(),
@@ -17,8 +17,8 @@ export const signupValidator = vine.create({
 })
 
 /**
- * Validator to use before validating user credentials
- * during login
+ * Validador a ser usado antes de validar as credenciais do usuário
+ * durante o login.
  */
 export const loginValidator = vine.create({
   email: email(),
