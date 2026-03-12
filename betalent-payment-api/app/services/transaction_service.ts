@@ -3,11 +3,16 @@ import Client from '#models/client'
 import Product from '#models/product'
 import Transaction from '#models/transaction'
 import TransactionProduct from '#models/transaction_product'
+import GatewayService from '#services/gateway_service'
+import { inject } from '@adonisjs/core'
 
 /**
  * Serviço responsável por gerenciar as transações de pagamento
  */
+@inject()
 export default class TransactionService {
+  constructor(protected gatewayService: GatewayService) {}
+
   /**
    * Processa a transação de pagamento e persiste os dados no banco
    */
@@ -44,6 +49,13 @@ export default class TransactionService {
         )
       }
 
+      // Simula o processamento do pagamento no Gateway
+      const gatewayResponse = await this.gatewayService.processPayment(
+        payload.amount,
+        payload.card_number,
+        payload.cvv
+      )
+
       // Prepara os dados para salvar a transação.
       // Apenas os últimos 4 dígitos do cartão são armazenados por segurança.
       const cardLastNumbers = payload.card_number.slice(-4)
@@ -53,9 +65,8 @@ export default class TransactionService {
           clientId: client.id,
           amount: payload.amount,
           cardLastNumbers: cardLastNumbers,
-          status: 'APPROVED',
-          // ID externo temporário enquanto a integração com gateways não é implementada
-          externalId: `mock_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+          status: gatewayResponse.status,
+          externalId: gatewayResponse.externalId,
         },
         { client: trx }
       )
