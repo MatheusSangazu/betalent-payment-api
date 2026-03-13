@@ -13,10 +13,17 @@ router.get('/', () => {
 })
 
 const TransactionController = () => import('#controllers/transaction_controller')
+const GatewaysController = () => import('#controllers/gateways_controller')
 
 router.group(() => {
   router.get('transactions', [TransactionController, 'index'])
   router.post('transactions', [TransactionController, 'store'])
+
+  // Rotas de Gestão de Gateways (Privadas)
+  router.group(() => {
+    router.get('gateways', [GatewaysController, 'index'])
+    router.patch('gateways/:id', [GatewaysController, 'update'])
+  }).use(middleware.auth())
 }).prefix('api')
 
 router
