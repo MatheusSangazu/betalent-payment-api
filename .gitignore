@@ -1,6 +1,14 @@
-# Dependencies and AdonisJS build
-node_modules
-build
+# Trae IDE folder
+.trae/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Project dependencies
+node_modules/
+dist/
+build/
 tmp/*
 !tmp/.gitkeep
 
@@ -21,11 +29,3 @@ yarn-error.log
 .fleet
 .idea
 .vscode
-
-# Platform specific
-.DS_Store
-
-# Trae IDE folder
-.trae/
-
-
