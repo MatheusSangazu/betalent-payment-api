@@ -1,30 +1,38 @@
-  import { setTimeout } from 'node:timers/promises'
+import Gateway1Adapter from './gateways/gateway1_adapter.js'
+import Gateway2Adapter from './gateways/gateway2_adapter.js'
+import { GatewayAdapter, PaymentResponse } from './gateways/gateway_adapter.js'
 
 /**
- * Serviço que simula o Gateway de Pagamento
+ * Serviço que gerencia a comunicação com os diversos gateways de pagamento
  */
 export default class GatewayService {
+  private adapters: Record<string, GatewayAdapter> = {
+    'Gateway 1': new Gateway1Adapter(),
+    'Gateway 2': new Gateway2Adapter(),
+  }
+
   /**
-   * Processa o pagamento simulando um delay de rede e aplicando regras de mock
+   * Tenta processar o pagamento em um gateway específico
    */
-  public async processPayment(amount: number, _cardNumber: string, _cvv: string) {
-    // Simula um delay de rede de 1 segundo
-    await setTimeout(1000)
+  public async processPayment(
+    gatewayName: string,
+    data: {
+      amount: number
+      name: string
+      email: string
+      cardNumber: string
+      cvv: string
+    }
+  ): Promise<PaymentResponse> {
+    const adapter = this.adapters[gatewayName]
 
-    // Gera um ID aleatório para a transação no gateway
-    const randomId = Math.random().toString(36).substring(2, 11)
-
-    // Regra de Mock: valores acima de 10.000 são rejeitados
-    if (amount > 10000) {
+    if (!adapter) {
       return {
         status: 'FAILED',
-        externalId: `rejeitado_${randomId}`,
+        externalId: `error_gateway_not_found_${Date.now()}`,
       }
     }
 
-    return {
-      status: 'APPROVED',
-      externalId: `aprovado_${randomId}`,
-    }
+    return await adapter.processPayment(data)
   }
 }
