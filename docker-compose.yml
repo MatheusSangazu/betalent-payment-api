@@ -13,6 +13,8 @@ services:
   gateways-mock:
     image: matheusprotzen/gateways-mock
     container_name: betalent-gateways-mock
+    environment:
+      - REMOVE_AUTH=true
     ports:
       - "3001:3001"
       - "3002:3002"
