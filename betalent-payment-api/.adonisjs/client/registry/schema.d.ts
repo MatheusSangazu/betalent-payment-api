@@ -7,6 +7,18 @@ import type { InferInput, SimpleError } from '@vinejs/vine/types'
 export type ParamValue = string | number | bigint | boolean
 
 export interface Registry {
+  'transaction.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/transactions'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/transaction_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/transaction_controller').default['index']>>>
+    }
+  }
   'transaction.store': {
     methods: ["POST"]
     pattern: '/api/transactions'

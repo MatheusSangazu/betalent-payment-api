@@ -14,6 +14,48 @@ export default class TransactionService {
   constructor(protected gatewayService: GatewayService) {}
 
   /**
+   * Retorna todas as transações com filtros opcionais
+   */
+  public async getAllTransactions(filters: {
+    client_name?: string
+    status?: string
+    date_from?: string
+    date_to?: string
+  }) {
+    const query = Transaction.query()
+      // Carrega os dados do cliente e produtos (Eager Loading)
+      .preload('client')
+      .preload('transactionProducts', (tpQuery) => {
+        tpQuery.preload('product')
+      })
+
+    // Filtro por nome do cliente (busca parcial)
+    if (filters.client_name) {
+      query.whereHas('client', (clientQuery) => {
+        clientQuery.where('name', 'like', `%${filters.client_name}%`)
+      })
+    }
+
+    // Filtro por status (APPROVED ou FAILED)
+    if (filters.status) {
+      query.where('status', filters.status)
+    }
+
+    // Filtro por intervalo de datas (createdAt)
+    if (filters.date_from) {
+      const fromDate = `${filters.date_from} 00:00:00`
+      query.where('createdAt', '>=', fromDate)
+    }
+
+    if (filters.date_to) {
+      const toDate = `${filters.date_to} 23:59:59`
+      query.where('createdAt', '<=', toDate)
+    }
+
+    return await query.orderBy('createdAt', 'desc')
+  }
+
+  /**
    * Processa a transação de pagamento e persiste os dados no banco
    */
   public async processPayment(payload: {

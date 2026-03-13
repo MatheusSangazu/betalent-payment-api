@@ -8,6 +8,15 @@ export default class TransactionController {
   constructor(protected transactionService: TransactionService) {}
 
   /**
+   * Lista as transações com filtros
+   */
+  public async index({ request, response }: HttpContext) {
+    const filters = request.qs()
+    const transactions = await this.transactionService.getAllTransactions(filters)
+    return response.ok(transactions)
+  }
+
+  /**
    * Registra uma nova transação
    */
   public async store({ request, response }: HttpContext) {

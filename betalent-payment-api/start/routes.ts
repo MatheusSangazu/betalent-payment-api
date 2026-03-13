@@ -15,6 +15,7 @@ router.get('/', () => {
 const TransactionController = () => import('#controllers/transaction_controller')
 
 router.group(() => {
+  router.get('transactions', [TransactionController, 'index'])
   router.post('transactions', [TransactionController, 'store'])
 }).prefix('api')
 
