@@ -3,6 +3,7 @@ import Client from '#models/client'
 import Product from '#models/product'
 import Transaction from '#models/transaction'
 import TransactionProduct from '#models/transaction_product'
+import Gateway from '#models/gateway'
 import GatewayService from '#services/gateway_service'
 import { inject } from '@adonisjs/core'
 
@@ -91,12 +92,41 @@ export default class TransactionService {
         )
       }
 
-      // Simula o processamento do pagamento no Gateway
-      const gatewayResponse = await this.gatewayService.processPayment(
-        payload.amount,
-        payload.card_number,
-        payload.cvv
-      )
+      // Busca gateways ativos ordenados por prioridade (menor número = maior prioridade)
+      const activeGateways = await Gateway.query()
+        .where('isActive', true)
+        .orderBy('priority', 'asc')
+        .useTransaction(trx)
+
+      if (activeGateways.length === 0) {
+        throw new Error('Nenhum gateway de pagamento ativo configurado.')
+      }
+
+      let finalStatus: 'APPROVED' | 'FAILED' = 'FAILED'
+      let finalExternalId = ''
+      let usedGatewayId: number | null = null
+
+      // Lógica de Fallback: Tenta os gateways em ordem de prioridade
+      for (const gateway of activeGateways) {
+        const response = await this.gatewayService.processPayment(gateway.name, {
+          amount: payload.amount,
+          name: payload.client_name,
+          email: payload.client_email,
+          cardNumber: payload.card_number,
+          cvv: payload.cvv,
+        })
+
+        if (response.status === 'APPROVED') {
+          finalStatus = 'APPROVED'
+          finalExternalId = response.externalId
+          usedGatewayId = gateway.id
+          break // Se aprovou em um, para o fallback
+        }
+
+        // Se falhou e for o último gateway, salva o erro dele
+        finalExternalId = response.externalId
+        usedGatewayId = gateway.id
+      }
 
       // Prepara os dados para salvar a transação.
       // Apenas os últimos 4 dígitos do cartão são armazenados por segurança.
@@ -105,10 +135,11 @@ export default class TransactionService {
       const transaction = await Transaction.create(
         {
           clientId: client.id,
+          gatewayId: usedGatewayId!,
           amount: payload.amount,
           cardLastNumbers: cardLastNumbers,
-          status: gatewayResponse.status,
-          externalId: gatewayResponse.externalId,
+          status: finalStatus,
+          externalId: finalExternalId,
         },
         { client: trx }
       )
@@ -125,12 +156,12 @@ export default class TransactionService {
 
       // Carrega os dados do cliente antes de finalizar a transação do banco
       await transaction.load('client')
-      
+
       // Confirma todas as operações no banco de dados
       await trx.commit()
 
       return transaction
-
+      
     } catch (error) {
       // Reverte as alterações em caso de falha em qualquer etapa
       await trx.rollback()
