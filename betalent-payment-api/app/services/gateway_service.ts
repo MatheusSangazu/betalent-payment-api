@@ -1,4 +1,4 @@
-import { setTimeout } from 'node:timers/promises'
+  import { setTimeout } from 'node:timers/promises'
 
 /**
  * Serviço que simula o Gateway de Pagamento
