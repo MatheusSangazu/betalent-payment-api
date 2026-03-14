@@ -6,15 +6,15 @@ export default class GatewaysController {
   /**
    * Lista todos os gateways cadastrados
    */
-  public async index({ response }: HttpContext) {
+  public async index({ serialize }: HttpContext) {
     const gateways = await Gateway.query().orderBy('priority', 'asc')
-    return response.ok(gateways)
+    return serialize(gateways)
   }
 
   /**
    * Atualiza o status de ativação ou a prioridade de um gateway
    */
-  public async update({ params, request, response }: HttpContext) {
+  public async update({ params, request, serialize }: HttpContext) {
     const gateway = await Gateway.findOrFail(params.id)
 
     const schema = vine.create(
@@ -29,6 +29,6 @@ export default class GatewaysController {
     gateway.merge(payload)
     await gateway.save()
 
-    return response.ok(gateway)
+    return serialize(gateway)
   }
 }

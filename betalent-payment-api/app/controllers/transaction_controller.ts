@@ -10,30 +10,30 @@ export default class TransactionController {
   /**
    * Lista as transações com filtros
    */
-  public async index({ request, response }: HttpContext) {
+  public async index({ request, serialize }: HttpContext) {
     const filters = request.qs()
     const transactions = await this.transactionService.getAllTransactions(filters)
-    return response.ok(transactions)
+    return serialize(transactions)
   }
 
   /**
    * Registra uma nova transação
    */
-  public async store({ request, response }: HttpContext) {
+  public async store({ request, response, serialize }: HttpContext) {
     // Valida os dados da requisição conforme o schema do VineJS
     const payload = await request.validateUsing(createTransactionValidator)
 
     // Processa o pagamento através da camada de serviço
     const transaction = await this.transactionService.processPayment(payload)
 
-    return response.created(transaction)
+    return response.created(serialize(transaction))
   }
 
   /**
    * Realiza o estorno de uma transação
    */
-  public async refund({ params, response }: HttpContext) {
+  public async refund({ params, serialize }: HttpContext) {
     const transaction = await this.transactionService.refund(params.id)
-    return response.ok(transaction)
+    return serialize(transaction)
   }
 }

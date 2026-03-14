@@ -26,8 +26,10 @@ test.group('Transactions', () => {
     // 3. Asserções
     response.assertStatus(201)
     response.assertBodyContains({
-      status: 'APPROVED',
-      amount: 2000 // 1000 * 2
+      data: {
+        status: 'APPROVED',
+        amount: 2000 // 1000 * 2
+      }
     })
   })
 

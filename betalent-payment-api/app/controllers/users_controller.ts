@@ -10,23 +10,23 @@ export default class UsersController {
   /**
    * Lista todos os usuários
    */
-  public async index({ response }: HttpContext) {
+  public async index({ serialize }: HttpContext) {
     const users = await this.userService.all()
-    return response.ok(users)
+    return serialize(users)
   }
 
   /**
    * Busca um usuário por ID
    */
-  public async show({ params, response }: HttpContext) {
+  public async show({ params, serialize }: HttpContext) {
     const user = await this.userService.find(params.id)
-    return response.ok(user)
+    return serialize(user)
   }
 
   /**
    * Cria um novo usuário
    */
-  public async store({ request, response }: HttpContext) {
+  public async store({ request, response, serialize }: HttpContext) {
     const schema = vine.create(
       vine.object({
         fullName: vine.string().nullable().optional(),
@@ -39,13 +39,13 @@ export default class UsersController {
     const payload = await request.validateUsing(schema)
     const user = await this.userService.create(payload)
 
-    return response.created(user)
+    return response.created(serialize(user))
   }
 
   /**
    * Atualiza um usuário existente
    */
-  public async update({ params, request, response }: HttpContext) {
+  public async update({ params, request, serialize }: HttpContext) {
     const schema = vine.create(
       vine.object({
         fullName: vine.string().trim().nullable().optional(),
@@ -70,7 +70,7 @@ export default class UsersController {
     const payload = await request.validateUsing(schema)
     const user = await this.userService.update(params.id, payload)
 
-    return response.ok(user)
+    return serialize(user)
   }
 
   /**

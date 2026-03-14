@@ -9,16 +9,16 @@ export default class ClientsController {
   /**
    * Lista todos os clientes
    */
-  public async index({ response }: HttpContext) {
+  public async index({ serialize }: HttpContext) {
     const clients = await this.clientService.all()
-    return response.ok(clients)
+    return serialize(clients)
   }
 
   /**
    * Detalhe do cliente e todas suas compras
    */
-  public async show({ params, response }: HttpContext) {
+  public async show({ params, serialize }: HttpContext) {
     const client = await this.clientService.findWithTransactions(params.id)
-    return response.ok(client)
+    return serialize(client)
   }
 }

@@ -37,10 +37,23 @@ class ApiSerializer extends BaseSerializer<{
  * Single instance of ApiSerializer used across the application
  */
 const serializer = new ApiSerializer()
-const serialize = serializer.serialize.bind(serializer) as ApiSerializer['serialize'] & {
-  withoutWrapping: ApiSerializer['serializeWithoutWrapping']
+
+/**
+ * Custom serialize function that ensures all responses are wrapped in a 'data' property.
+ */
+function serialize(data: any) {
+  // If data is already wrapped or null/undefined, return as is
+  if (data === null || data === undefined || (typeof data === 'object' && 'data' in data)) {
+    return data
+  }
+
+  // If it's a Lucid model, convert to JSON first
+  const plainData = typeof data.toJSON === 'function' ? data.toJSON() : data
+
+  return {
+    data: plainData,
+  }
 }
-serialize.withoutWrapping = serializer.serializeWithoutWrapping.bind(serializer)
 
 /**
  * Adds the serialize method to all HttpContext instances.
