@@ -28,4 +28,12 @@ export default class TransactionController {
 
     return response.created(transaction)
   }
+
+  /**
+   * Realiza o estorno de uma transação
+   */
+  public async refund({ params, response }: HttpContext) {
+    const transaction = await this.transactionService.refund(params.id)
+    return response.ok(transaction)
+  }
 }

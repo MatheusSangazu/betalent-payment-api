@@ -49,4 +49,23 @@ export default class Gateway1Adapter implements GatewayAdapter {
       }
     }
   }
+
+  public async chargeback(externalId: string): Promise<{ status: 'REFUNDED' | 'FAILED' }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/transactions/${externalId}/charge_back`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        return { status: 'FAILED' }
+      }
+
+      return { status: 'REFUNDED' }
+    } catch (error) {
+      return { status: 'FAILED' }
+    }
+  }
 }

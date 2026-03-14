@@ -35,4 +35,17 @@ export default class GatewayService {
 
     return await adapter.processPayment(data)
   }
+
+  /**
+   * Realiza o estorno (chargeback) em um gateway específico
+   */
+  public async chargeback(gatewayName: string, externalId: string) {
+    const adapter = this.adapters[gatewayName]
+
+    if (!adapter) {
+      throw new Error(`Adapter para o gateway "${gatewayName}" não encontrado.`)
+    }
+
+    return await adapter.chargeback(externalId)
+  }
 }
