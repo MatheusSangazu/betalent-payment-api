@@ -11,6 +11,17 @@
 */
 
 process.env.NODE_ENV = 'test'
+import dotenv from 'dotenv'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// Força a porta no ambiente e garante que o .env.test seja carregado com prioridade (override)
+process.env.PORT = '3334'
+dotenv.config({ path: join(__dirname, '..', '.env.test'), override: true })
 
 import 'reflect-metadata'
 import { Ignitor, prettyPrintError } from '@adonisjs/core'

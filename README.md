@@ -81,10 +81,18 @@ Inicialmente cogitei usar SQLite para os testes por ser mais rápido, mas decidi
 ### 3. Orquestração de Microserviços
 Integrar dois gateways diferentes com comportamentos de autenticação e payloads distintos (um em inglês, outro em português) exigiu uma abstração sólida usando o **Adapter Pattern**, facilitando o escalonamento para novos gateways no futuro.
 
+> 💡 **Nota sobre Comunicação entre Containers:** Seguindo as boas práticas de Docker, a API comunica-se com os mocks dos gateways através da rede interna (`http://betalent-gateways-mock`), garantindo maior estabilidade. No entanto, para acesso externo (seu navegador ou Postman local), os mocks continuam disponíveis em `http://localhost:3001` e `http://localhost:3002`, conforme solicitado nos requisitos.
+
 ## 🧪 Rodando Testes (TDD)
-O projeto foi desenvolvido utilizando TDD. Para garantir a **máxima integridade e isolamento dos dados**, os testes utilizam um banco de dados MySQL dedicado (`betalent_db_test`), o que garante:
-- **Isolamento Total:** Rodar os testes **não apaga ou modifica** os dados que você criou no banco principal (`betalent_db`) via Postman.
+O projeto foi desenvolvido utilizando TDD, com uma estrutura que combina **Testes Unitários** e **Testes Funcionais**. Para garantir a **máxima integridade e isolamento dos dados**, os testes utilizam:
+- **Banco de Dados Dedicado:** Um banco MySQL separado (`betalent_db_test`) é usado para os testes, garantindo que rodar a suíte **não apaga ou modifica** os dados do banco principal (`betalent_db`) usados no Postman.
+- **Isolamento de Portas:** O servidor de testes sobe automaticamente na porta `3334`, permitindo que você execute os testes mesmo com a API principal rodando na porta `3333`.
+- **Transações com Rollback:** Cada teste funcional abre uma transação e realiza rollback ao final, mantendo o banco de teste sempre limpo.
 - **Confiabilidade:** Os testes rodam diretamente no motor MySQL 8.0, garantindo paridade total com o ambiente de produção.
+
+### Estrutura de Testes:
+- **Unitários (`tests/unit`)**: Testam a lógica isolada dos Adapters de Gateway, validando a tradução correta dos payloads para cada provedor sem necessidade de rede ou banco.
+- **Funcionais (`tests/functional`)**: Testam as rotas de ponta a ponta (Login, RBAC, Transactions, Fallback).
 
 > **Nota sobre o Framework de Testes:** Utilizamos o **Japa** (japa.dev), que é a biblioteca de testes oficial e padrão recomendada pelo ecossistema AdonisJS v6. O nome é uma marca registrada do framework e não possui qualquer conotação negativa no contexto de desenvolvimento de software.
 
