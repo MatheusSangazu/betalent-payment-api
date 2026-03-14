@@ -39,22 +39,51 @@ O projeto utiliza variáveis de ambiente para segurança. Crie o arquivo `.env` 
 cp .env.example .env
 ```
 
-### 3. Rodar com Docker (Recomendado)
+### 3. Inicializar Dependências e TypeScript
+Antes de subir os containers, instale as dependências locais para garantir que o TypeScript e os comandos do AdonisJS (Ace) funcionem corretamente:
+
+```bash
+npm install
+```
+
+### 4. Rodar com Docker (Recomendado)
 O projeto está totalmente Dockerizado. Basta um comando para subir o Banco de Dados, os Mocks dos Gateways e a API:
 ```bash
 docker compose up -d --build
 ```
 
-### 4. Seeders Iniciais
-Após os containers subirem, popule os gateways, produtos e o usuário admin inicial utilizando o comando de seed:
+### 4. Setup do Banco de Dados
+Após os containers subirem, você precisa criar as tabelas e popular os dados iniciais:
 ```bash
+# 1. Cria as tabelas no banco de dados
+docker exec -it betalent-api node ace migration:run
+
+# 2. Popula gateways, produtos e usuário admin
 docker exec -it betalent-api node ace db:seed
 ```
 *   **O que o seed cria:** Gateways 1 e 2, 3 produtos de exemplo e um usuário Admin.
 *   **Usuário Admin padrão:** `admin@betalent.tech` / **password:** `admin_password_123`
 
-## 🧪 Rodando Testes (TDD)
-O projeto foi desenvolvido utilizando TDD. Para garantir a **facilidade de avaliação**, os testes podem ser executados diretamente por dentro do container da API, sem necessidade de configurar o ambiente localmente.
+## � Desafios e Aprendizados
+
+Durante o desenvolvimento deste desafio, enfrentei alguns obstáculos técnicos interessantes que me ajudaram a evoluir a arquitetura do projeto:
+
+### 1. Isolamento de Dados em Testes Automatizados
+Um dos maiores desafios foi garantir que os testes automatizados não interferissem no ambiente de uso manual (Postman).
+- **Problema:** Um dos testes exige desativar todos os gateways para validar o erro de configuração. Ao rodar esse teste, o banco de dados principal ficava com os gateways desligados, quebrando os testes manuais no Postman logo em seguida.
+- **Solução Sênior:** Implementei **Transações Globais com Rollback** nos hooks de teste do AdonisJS. Agora, cada teste abre uma transação, realiza suas operações e sofre um rollback automático ao final. Isso garante que o banco de dados MySQL permaneça sempre no estado original do seeder, permitindo que a avaliação via Postman ocorra sem atritos logo após a execução da suíte de testes.
+
+### 2. Paridade de Ambiente (MySQL vs SQLite)
+Inicialmente cogitei usar SQLite para os testes por ser mais rápido, mas decidi manter o **MySQL 8.0** também na suíte de testes.
+- **Motivo:** Garantir 100% de paridade entre o que é testado e o que roda em produção, evitando comportamentos divergentes em tipos de dados específicos ou constraints de banco.
+
+### 3. Orquestração de Microserviços
+Integrar dois gateways diferentes com comportamentos de autenticação e payloads distintos (um em inglês, outro em português) exigiu uma abstração sólida usando o **Adapter Pattern**, facilitando o escalonamento para novos gateways no futuro.
+
+## �🧪 Rodando Testes (TDD)
+O projeto foi desenvolvido utilizando TDD. Para garantir a **máxima integridade dos dados**, os testes utilizam **Transações Globais (Rollback)**, o que garante:
+- **Segurança de Dados:** Rodar os testes **não apaga ou modifica** permanentemente os dados que você criou via Postman. Ao final de cada teste, o banco sofre um rollback automático.
+- **Confiabilidade:** Os testes rodam diretamente no MySQL 8.0, garantindo paridade total com o ambiente de produção.
 
 Com os containers rodando, execute o comando abaixo em um novo terminal:
 ```bash
@@ -71,7 +100,7 @@ docker rm -f betalent-gateways-mock betalent-api betalent-mysql
 docker compose up -d --build
 ```
 
-## �📮 Testando com Postman
+## �� Testando com Postman
 Para facilitar a sua avaliação, disponibilizamos uma **Collection do Postman** já configurada com todas as rotas da API.
 
 1.  Importe o arquivo `betalent_payment_api_collection.json` (na raiz deste repositório) no seu Postman.

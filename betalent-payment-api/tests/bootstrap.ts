@@ -23,13 +23,21 @@ export const plugins: Config['plugins'] = [
 
 
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
-  setup: [],
+  setup: [
+    () => testUtils.db().migrate(),
+  ],
   teardown: [],
 }
 
 
+import db from '@adonisjs/lucid/services/db'
+
 export const configureSuite: Config['configureSuite'] = (suite) => {
   if (['browser', 'functional', 'e2e', 'unit'].includes(suite.name)) {
-    return suite.setup(() => testUtils.httpServer().start())
+    suite.setup(() => testUtils.httpServer().start())
+    suite.onTest(async (test) => {
+      await db.beginGlobalTransaction()
+      test.cleanup(() => db.rollbackGlobalTransaction())
+    })
   }
 }
