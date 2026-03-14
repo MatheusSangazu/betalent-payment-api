@@ -19,7 +19,12 @@ API RESTful para gerenciamento de pagamentos multi-gateway, desenvolvida como pa
 - **Gestão de Gateways:** Interface administrativa para ativar/desativar gateways e alterar prioridades.
 - **Reembolso:** Suporte a estorno de transações aprovadas.
 
-## 🛠️ Como Instalar e Rodar
+## 🛠️ Pré-requisitos
+Antes de começar, você precisará ter instalado em sua máquina:
+- [Docker](https://www.docker.com/get-started) & [Docker Compose](https://docs.docker.com/compose/install/)
+- Um cliente para testes de API (Recomendado: [Postman](https://www.postman.com/))
+
+## 🚀 Como Instalar e Rodar
 
 ### 1. Clonar o Repositório
 ```bash
@@ -56,7 +61,17 @@ Com os containers rodando, execute o comando abaixo em um novo terminal:
 docker exec -it betalent-api node ace test
 ```
 
-## 📮 Testando com Postman
+## �️ Solução de Problemas
+
+### Conflito de Nomes de Container
+Se você encontrar um erro dizendo que o nome do container já está em uso, execute:
+```bash
+docker compose down
+docker rm -f betalent-gateways-mock betalent-api betalent-mysql
+docker compose up -d --build
+```
+
+## �📮 Testando com Postman
 Para facilitar a sua avaliação, disponibilizamos uma **Collection do Postman** já configurada com todas as rotas da API.
 
 1.  Importe o arquivo `betalent_payment_api_collection.json` (na raiz deste repositório) no seu Postman.
