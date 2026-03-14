@@ -26,16 +26,16 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
   setup: [
     () => testUtils.db().migrate(),
   ],
-  teardown: [],
+  teardown: [() => app.terminate(),],
 }
 
 
 export const configureSuite: Config['configureSuite'] = (suite) => {
   if (['browser', 'functional', 'e2e'].includes(suite.name)) {
-    suite.setup(async () => {
+    suite.setup( () => {
       // Força a porta no ambiente antes de subir o servidor para evitar conflitos
       process.env.PORT = '3334'
-      await testUtils.httpServer().start()
+      return testUtils.httpServer().start()
     })
     
     suite.onTest((test) => {
