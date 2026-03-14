@@ -19,11 +19,14 @@ router.group(() => {
   router.get('transactions', [TransactionController, 'index'])
   router.post('transactions', [TransactionController, 'store'])
 
-  // Rotas de Gestão de Gateways (Privadas)
+  // Rotas de Gestão de Gateways (Privadas - ADMIN apenas)
   router.group(() => {
     router.get('gateways', [GatewaysController, 'index'])
     router.patch('gateways/:id', [GatewaysController, 'update'])
-  }).use(middleware.auth())
+  }).use([
+    middleware.auth(),
+    middleware.role(['ADMIN'])
+  ])
 }).prefix('api')
 
 router
