@@ -11,4 +11,6 @@ export interface GatewayAdapter {
     cardNumber: string
     cvv: string
   }): Promise<PaymentResponse>
+
+  chargeback(externalId: string): Promise<{ status: 'REFUNDED' | 'FAILED' }>
 }

@@ -57,13 +57,44 @@ export default class TransactionService {
   }
 
   /**
+   * Realiza o reembolso de uma transação
+   */
+  public async refund(transactionId: number) {
+    const transaction = await Transaction.query()
+      .where('id', transactionId)
+      .preload('gateway')
+      .firstOrFail()
+
+    if (transaction.status === 'REFUNDED') {
+      throw new Error('Esta transação já foi reembolsada.')
+    }
+
+    if (transaction.status !== 'APPROVED') {
+      throw new Error('Apenas transações aprovadas podem ser reembolsadas.')
+    }
+
+    // Chama o gateway responsável pelo pagamento original para processar o estorno
+    const response = await this.gatewayService.chargeback(
+      transaction.gateway.name,
+      transaction.externalId
+    )
+
+    if (response.status === 'REFUNDED') {
+      transaction.status = 'REFUNDED'
+      await transaction.save()
+    }
+
+    return transaction
+  }
+
+  /**
    * Processa a transação de pagamento e persiste os dados no banco
    */
   public async processPayment(payload: {
-    amount: number
+
     client_name: string
     client_email: string
-    product_id: number
+    products: { id: number; quantity: number }[]
     card_number: string
     cvv: string
     card_expiration_date: string
@@ -79,24 +110,21 @@ export default class TransactionService {
         { client: trx }
       )
 
-      // Localiza o produto ou cria um registro temporário para evitar falhas no teste
-      let product = await Product.find(payload.product_id, { client: trx })
-      if (!product) {
-        product = await Product.create(
-          {
-            id: payload.product_id,
-            name: 'Produto Mock',
-            amount: payload.amount,
-          },
-          { client: trx }
-        )
+      let totalAmount = 0
+      const productRecords: { product: Product; quantity: number }[] = []
+
+      // Busca os produtos e calcula o valor total no back-end (Nível 3)
+      for (const p of payload.products) {
+        const product = await Product.findOrFail(p.id, { client: trx })
+        totalAmount += product.amount * p.quantity
+        productRecords.push({ product, quantity: p.quantity })
       }
 
       // Busca gateways ativos ordenados por prioridade (menor número = maior prioridade)
-      const activeGateways = await Gateway.query()
+      const activeGateways = await Gateway.query({ client: trx })
         .where('isActive', true)
         .orderBy('priority', 'asc')
-        .useTransaction(trx)
+
 
       if (activeGateways.length === 0) {
         throw new Error('Nenhum gateway de pagamento ativo configurado.')
@@ -109,7 +137,7 @@ export default class TransactionService {
       // Lógica de Fallback: Tenta os gateways em ordem de prioridade
       for (const gateway of activeGateways) {
         const response = await this.gatewayService.processPayment(gateway.name, {
-          amount: payload.amount,
+          amount: totalAmount,
           name: payload.client_name,
           email: payload.client_email,
           cardNumber: payload.card_number,
@@ -136,7 +164,7 @@ export default class TransactionService {
         {
           clientId: client.id,
           gatewayId: usedGatewayId!,
-          amount: payload.amount,
+          amount: totalAmount,
           cardLastNumbers: cardLastNumbers,
           status: finalStatus,
           externalId: finalExternalId,
@@ -144,15 +172,17 @@ export default class TransactionService {
         { client: trx }
       )
 
-      // Vincula a transação ao produto na tabela pivô
-      await TransactionProduct.create(
-        {
-          transactionId: transaction.id,
-          productId: product.id,
-          quantity: 1,
-        },
-        { client: trx }
-      )
+      // Vincula a transação aos produtos na tabela pivô
+      for (const record of productRecords) {
+        await TransactionProduct.create(
+          {
+            transactionId: transaction.id,
+            productId: record.product.id,
+            quantity: record.quantity,
+          },
+          { client: trx }
+        )
+      }
 
       // Carrega os dados do cliente antes de finalizar a transação do banco
       await transaction.load('client')

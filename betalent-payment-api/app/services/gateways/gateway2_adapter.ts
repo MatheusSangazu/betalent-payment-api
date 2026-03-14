@@ -51,4 +51,26 @@ export default class Gateway2Adapter implements GatewayAdapter {
       }
     }
   }
+
+  public async chargeback(externalId: string): Promise<{ status: 'REFUNDED' | 'FAILED' }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/transacoes/reembolso`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Gateway-Auth-Token': 'tk_f2198cc671b5289fa856',
+          'Gateway-Auth-Secret': '3d15e8ed6131446ea7e3456728b1211f',
+        },
+        body: JSON.stringify({ id: externalId }),
+      })
+
+      if (!response.ok) {
+        return { status: 'FAILED' }
+      }
+
+      return { status: 'REFUNDED' }
+    } catch (error) {
+      return { status: 'FAILED' }
+    }
+  }
 }

@@ -22,6 +22,11 @@ router.group(() => {
   router.get('transactions', [TransactionController, 'index'])
   router.post('transactions', [TransactionController, 'store'])
 
+  // Rota de Reembolso (Privada - ADMIN e FINANCE)
+  router
+    .post('transactions/:id/refund', [TransactionController, 'refund'])
+    .use([middleware.auth(), middleware.role(['ADMIN', 'FINANCE'])])
+
   // Rotas de Gestão de Gateways (Privadas - ADMIN apenas)
   router.group(() => {
     router.get('gateways', [GatewaysController, 'index'])
