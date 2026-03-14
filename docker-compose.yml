@@ -22,6 +22,13 @@ services:
       - DB_PASSWORD=${MYSQL_PASSWORD}
       - DB_DATABASE=${MYSQL_DATABASE}
       - TZ=UTC
+      # Gateways
+      - GATEWAY_1_URL=${GATEWAY_1_URL}
+      - GATEWAY_1_EMAIL=${GATEWAY_1_EMAIL}
+      - GATEWAY_1_TOKEN=${GATEWAY_1_TOKEN}
+      - GATEWAY_2_URL=${GATEWAY_2_URL}
+      - GATEWAY_2_TOKEN=${GATEWAY_2_TOKEN}
+      - GATEWAY_2_SECRET=${GATEWAY_2_SECRET}
     depends_on:
       db:
         condition: service_healthy
