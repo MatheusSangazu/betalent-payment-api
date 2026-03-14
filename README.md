@@ -40,14 +40,16 @@ cp .env.example .env
 ```
 
 ### 3. Inicializar Dependências e TypeScript
-Antes de subir os containers, instale as dependências locais para garantir que o TypeScript e os comandos do AdonisJS (Ace) funcionem corretamente:
+Antes de subir os containers, entre na pasta da aplicação e instale as dependências locais para garantir que o TypeScript e os comandos do AdonisJS (Ace) funcionem corretamente:
 
 ```bash
+cd betalent-payment-api
 npm install
+cd ..
 ```
 
 ### 4. Rodar com Docker (Recomendado)
-O projeto está totalmente Dockerizado. Basta um comando para subir o Banco de Dados, os Mocks dos Gateways e a API:
+Certifique-se de estar na **raiz do projeto** (onde está o arquivo `docker-compose.yml`) e execute:
 ```bash
 docker compose up -d --build
 ```
@@ -81,9 +83,11 @@ Inicialmente cogitei usar SQLite para os testes por ser mais rápido, mas decidi
 Integrar dois gateways diferentes com comportamentos de autenticação e payloads distintos (um em inglês, outro em português) exigiu uma abstração sólida usando o **Adapter Pattern**, facilitando o escalonamento para novos gateways no futuro.
 
 ## 🧪 Rodando Testes (TDD)
-O projeto foi desenvolvido utilizando TDD. Para garantir a **máxima integridade dos dados**, os testes utilizam **Transações Globais (Rollback)**, o que garante:
-- **Segurança de Dados:** Rodar os testes **não apaga ou modifica** permanentemente os dados que você criou via Postman. Ao final de cada teste, o banco sofre um rollback automático.
-- **Confiabilidade:** Os testes rodam diretamente no MySQL 8.0, garantindo paridade total com o ambiente de produção.
+O projeto foi desenvolvido utilizando TDD. Para garantir a **máxima integridade e isolamento dos dados**, os testes utilizam um banco de dados MySQL dedicado (`betalent_db_test`), o que garante:
+- **Isolamento Total:** Rodar os testes **não apaga ou modifica** os dados que você criou no banco principal (`betalent_db`) via Postman.
+- **Confiabilidade:** Os testes rodam diretamente no motor MySQL 8.0, garantindo paridade total com o ambiente de produção.
+
+> **Nota sobre o Framework de Testes:** Utilizamos o **Japa** (japa.dev), que é a biblioteca de testes oficial e padrão recomendada pelo ecossistema AdonisJS v6. O nome é uma marca registrada do framework e não possui qualquer conotação negativa no contexto de desenvolvimento de software.
 
 Com os containers rodando, execute o comando abaixo em um novo terminal:
 ```bash
