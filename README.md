@@ -23,7 +23,7 @@ API RESTful para gerenciamento de pagamentos multi-gateway, desenvolvida como pa
 
 ### 1. Clonar o Repositório
 ```bash
-git clone <https://github.com/MatheusSangazu/betalent-payment-api>
+git clone https://github.com/MatheusSangazu/betalent-payment-api
 cd betalent-payment-api
 ```
 
@@ -41,12 +41,12 @@ docker compose up -d --build
 ```
 
 ### 4. Seeders Iniciais
-Após os containers subirem, popule os gateways e o usuário admin inicial utilizando o arquivo compilado:
+Após os containers subirem, popule os gateways, produtos e o usuário admin inicial utilizando o comando de seed:
 ```bash
-docker exec -it betalent-api node build/ace.js migration:run
-docker exec -it betalent-api node build/ace.js db:seed
+docker exec -it betalent-api node ace db:seed
 ```
-*Usuário Admin padrão: admin@betalent.tech / password: admin_password_123*
+*   **O que o seed cria:** Gateways 1 e 2, 3 produtos de exemplo e um usuário Admin.
+*   **Usuário Admin padrão:** `admin@betalent.tech` / **password:** `admin_password_123`
 
 ## 🧪 Rodando Testes (TDD)
 O projeto foi desenvolvido utilizando TDD. Para garantir a **facilidade de avaliação**, os testes podem ser executados diretamente por dentro do container da API, sem necessidade de configurar o ambiente localmente.
@@ -55,6 +55,13 @@ Com os containers rodando, execute o comando abaixo em um novo terminal:
 ```bash
 docker exec -it betalent-api node ace test
 ```
+
+## 📮 Testando com Postman
+Para facilitar a sua avaliação, disponibilizamos uma **Collection do Postman** já configurada com todas as rotas da API.
+
+1.  Importe o arquivo `betalent_payment_api_collection.json` (na raiz deste repositório) no seu Postman.
+2.  A collection já vem com as variáveis `base_url` pré-configuradas.
+3.  **Dica:** Ao realizar o login, o token será salvo automaticamente na variável `{{token}}` da collection, permitindo testar as rotas privadas sem esforço.
 
 ## 🛣️ Detalhamento de Rotas (Prefixo: `/api/v1`)
 
