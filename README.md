@@ -64,7 +64,7 @@ docker exec -it betalent-api node ace db:seed
 *   **O que o seed cria:** Gateways 1 e 2, 3 produtos de exemplo e um usuário Admin.
 *   **Usuário Admin padrão:** `admin@betalent.tech` / **password:** `admin_password_123`
 
-## � Desafios e Aprendizados
+## 🤓🧗 Desafios e Aprendizados
 
 Durante o desenvolvimento deste desafio, enfrentei alguns obstáculos técnicos interessantes que me ajudaram a evoluir a arquitetura do projeto:
 
@@ -80,7 +80,7 @@ Inicialmente cogitei usar SQLite para os testes por ser mais rápido, mas decidi
 ### 3. Orquestração de Microserviços
 Integrar dois gateways diferentes com comportamentos de autenticação e payloads distintos (um em inglês, outro em português) exigiu uma abstração sólida usando o **Adapter Pattern**, facilitando o escalonamento para novos gateways no futuro.
 
-## �🧪 Rodando Testes (TDD)
+## 🧪 Rodando Testes (TDD)
 O projeto foi desenvolvido utilizando TDD. Para garantir a **máxima integridade dos dados**, os testes utilizam **Transações Globais (Rollback)**, o que garante:
 - **Segurança de Dados:** Rodar os testes **não apaga ou modifica** permanentemente os dados que você criou via Postman. Ao final de cada teste, o banco sofre um rollback automático.
 - **Confiabilidade:** Os testes rodam diretamente no MySQL 8.0, garantindo paridade total com o ambiente de produção.
@@ -90,7 +90,7 @@ Com os containers rodando, execute o comando abaixo em um novo terminal:
 docker exec -it betalent-api node ace test
 ```
 
-## �️ Solução de Problemas
+## 💡 Solução de Problemas
 
 ### Conflito de Nomes de Container
 Se você encontrar um erro dizendo que o nome do container já está em uso, execute:
@@ -100,7 +100,7 @@ docker rm -f betalent-gateways-mock betalent-api betalent-mysql
 docker compose up -d --build
 ```
 
-## �� Testando com Postman
+## 🚹 Testando com Postman
 Para facilitar a sua avaliação, disponibilizamos uma **Collection do Postman** já configurada com todas as rotas da API.
 
 1.  Importe o arquivo `betalent_payment_api_collection.json` (na raiz deste repositório) no seu Postman.
