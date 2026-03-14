@@ -1,12 +1,50 @@
 services:
-  mysql:
-    image: mysql:8
+  app:
+    build:
+      context: ./betalent-payment-api
+      dockerfile: Dockerfile
+    container_name: betalent-api
+    ports:
+      - "${PORT:-3333}:3333"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=3333
+      - APP_KEY=${APP_KEY}
+      - APP_URL=http://localhost:3333
+      - LOG_LEVEL=info
+      - SESSION_DRIVER=cookie
+      - DRIVE_DISK=fs
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_DATABASE=${MYSQL_DATABASE}
+      - TZ=UTC
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - betalent-network
+
+  db:
+    image: mysql:8.0
     container_name: betalent-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: betalent_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - betalent-network
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -14,10 +52,16 @@ services:
     image: matheusprotzen/gateways-mock
     container_name: betalent-gateways-mock
     environment:
-      - REMOVE_AUTH=true
+      - REMOVE_AUTH=${REMOVE_AUTH:-true}
     ports:
-      - "3001:3001"
-      - "3002:3002"
+      - "${GATEWAY_1_PORT:-3001}:3001"
+      - "${GATEWAY_2_PORT:-3002}:3002"
+    networks:
+      - betalent-network
+
+networks:
+  betalent-network:
+    driver: bridge
 
 volumes:
   mysql_data:
