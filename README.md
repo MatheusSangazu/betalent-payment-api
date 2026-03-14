@@ -23,8 +23,8 @@ API RESTful para gerenciamento de pagamentos multi-gateway, desenvolvida como pa
 
 ### 1. Clonar o Repositório
 ```bash
-git clone <url-do-repositorio>
-cd testepratico
+git clone <https://github.com/MatheusSangazu/betalent-payment-api>
+cd betalent-payment-api
 ```
 
 ### 2. Configurar o Ambiente
