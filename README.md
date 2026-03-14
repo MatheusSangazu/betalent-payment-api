@@ -29,7 +29,6 @@ Antes de começar, você precisará ter instalado em sua máquina:
 ### 1. Clonar o Repositório
 ```bash
 git clone https://github.com/MatheusSangazu/betalent-payment-api
-cd betalent-payment-api
 ```
 
 ### 2. Configurar o Ambiente
