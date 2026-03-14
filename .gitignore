@@ -11,6 +11,7 @@ dist/
 build/
 tmp/*
 !tmp/.gitkeep
+.adonisjs/
 
 # Secrets
 .env
@@ -29,3 +30,7 @@ yarn-error.log
 .fleet
 .idea
 .vscode
+
+# Test files
+test_output.txt
+test_log.txt

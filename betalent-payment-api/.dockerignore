@@ -3,6 +3,7 @@ build
 tmp
 .adonisjs
 .env
+!.env.test
 .git
 Dockerfile
 docker-compose.yml

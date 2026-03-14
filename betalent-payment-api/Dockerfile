@@ -20,13 +20,17 @@ RUN node ace build --ignore-ts-errors
 # Step 3: Production stage
 FROM base AS production
 WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=build /app/build ./build
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/package-lock.json ./package-lock.json
-# Adiciona o arquivo ace para permitir comandos de CLI no container
-COPY --from=build /app/ace.js ./ace.js
-RUN npm ci --omit=dev
 
+# Copiar todo o código fonte para permitir a execução de testes (TDD)
+COPY . .
+
+# Copiar também o build compilado
+COPY --from=build /app/build ./build
+
+# Instalar todas as dependências (incluindo devDeps) para permitir rodar testes via Docker
+# Rodamos antes de definir NODE_ENV=production para garantir que devDeps sejam instaladas
+RUN npm ci
+
+ENV NODE_ENV=production
 EXPOSE 3333
 CMD ["node", "build/bin/server.js"]

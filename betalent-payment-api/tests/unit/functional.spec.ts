@@ -11,7 +11,7 @@ test.group('Transactions', () => {
     await Gateway.updateOrCreate({ name: 'Gateway 2' }, { isActive: true, priority: 2 })
 
     // 2. Realizar a requisição de compra
-    const response = await client.post('/api/transactions').json({
+    const response = await client.post('/api/v1/transactions').json({
       client_name: 'Teste Japa',
       client_email: 'japa@test.com',
       products: [
@@ -34,7 +34,7 @@ test.group('Transactions', () => {
   test('deve falhar se não houver gateways ativos', async ({ client }) => {
     await Gateway.query().update({ isActive: false })
 
-    const response = await client.post('/api/transactions').json({
+    const response = await client.post('/api/v1/transactions').json({
       client_name: 'Teste Falha',
       client_email: 'fail@test.com',
       products: [{ id: 1, quantity: 1 }],

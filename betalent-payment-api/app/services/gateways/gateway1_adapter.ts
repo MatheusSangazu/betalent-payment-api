@@ -1,10 +1,11 @@
+import env from '#start/env'
 import { GatewayAdapter, PaymentResponse } from './gateway_adapter.js'
 
 /**
  * Adapter para o Gateway 1 (Porta 3001)
  */
 export default class Gateway1Adapter implements GatewayAdapter {
-  private baseUrl = 'http://localhost:3001'
+  private baseUrl = env.get('GATEWAY_1_URL', 'http://betalent-gateways-mock:3001')
 
   public async processPayment(data: {
     amount: number
@@ -14,11 +15,15 @@ export default class Gateway1Adapter implements GatewayAdapter {
     cvv: string
   }): Promise<PaymentResponse> {
     try {
+      // No Gateway 1 real, precisaríamos de uma rota de login para obter o Bearer Token.
+      // Para o desafio Nível 3, o mock aceita bypass via REMOVE_AUTH='true' ou token fixo.
+      const token = env.get('GATEWAY_1_TOKEN')
+      
       const response = await fetch(`${this.baseUrl}/transactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // O teste menciona REMOVE_AUTH='true' para simplificar o Nível 1/2
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           amount: data.amount,
@@ -42,7 +47,8 @@ export default class Gateway1Adapter implements GatewayAdapter {
         status: 'APPROVED',
         externalId: result.id,
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`[Gateway 1 Error] URL: ${this.baseUrl}/transactions | Error:`, error.message)
       return {
         status: 'FAILED',
         externalId: `exception_${Date.now()}`,
@@ -52,10 +58,13 @@ export default class Gateway1Adapter implements GatewayAdapter {
 
   public async chargeback(externalId: string): Promise<{ status: 'REFUNDED' | 'FAILED' }> {
     try {
+      const token = env.get('GATEWAY_1_TOKEN')
+
       const response = await fetch(`${this.baseUrl}/transactions/${externalId}/charge_back`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
       })
 

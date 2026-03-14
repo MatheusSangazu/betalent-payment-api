@@ -48,32 +48,47 @@ docker exec -it betalent-api node build/ace.js db:seed
 ```
 *Usuário Admin padrão: admin@betalent.tech / password: admin_password_123*
 
-## 🧪 Rodando Testes
-Para executar os testes automatizados:
+## 🧪 Rodando Testes (TDD)
+O projeto foi desenvolvido utilizando TDD. Para garantir a **facilidade de avaliação**, os testes podem ser executados diretamente por dentro do container da API, sem necessidade de configurar o ambiente localmente.
+
+Com os containers rodando, execute o comando abaixo em um novo terminal:
 ```bash
-docker exec -it betalent-api npm test
+docker exec -it betalent-api node ace test
 ```
 
-## 🛣️ Detalhamento de Rotas
+## 🛣️ Detalhamento de Rotas (Prefixo: `/api/v1`)
 
-### Públicas
-- `POST /api/login`: Autenticação de usuários.
-- `POST /api/transactions`: Realizar uma nova compra informando lista de produtos.
+### 🔐 Autenticação (Públicas)
+- `POST /api/v1/auth/login`: Realiza o login e retorna o Bearer Token.
+- `POST /api/v1/auth/logout`: Invalida o token atual (Requer Token).
+- `GET /api/v1/auth/me`: Retorna dados do usuário logado (Requer Token).
 
-### Privadas (Requerem Bearer Token)
-- **Gateways (ADMIN):**
-  - `GET /api/gateways`: Listar gateways.
-  - `PATCH /api/gateways/:id`: Alterar status ou prioridade.
-- **Transações (ADMIN/FINANCE):**
-  - `GET /api/transactions`: Listar histórico com filtros.
-  - `POST /api/transactions/:id/refund`: Realizar estorno.
-- **Produtos (ADMIN/MANAGER/FINANCE):**
-  - `CRUD /api/products`: Gerenciamento de catálogo.
-- **Usuários (ADMIN/MANAGER):**
-  - `CRUD /api/users`: Gestão de membros da equipe.
-- **Clientes (ADMIN/MANAGER/FINANCE):**
-  - `GET /api/clients`: Listar todos.
-  - `GET /api/clients/:id`: Perfil detalhado com histórico de compras.
+### 🛒 Vendas (Públicas)
+- `POST /api/v1/transactions`: Realiza uma compra informando lista de produtos.
+
+### 💳 Financeiro (Privadas - ADMIN / FINANCE)
+- `GET /api/v1/transactions`: Lista todas as transações.
+- `POST /api/v1/transactions/:id/refund`: Realiza o estorno de uma transação aprovada.
+
+### ⚙️ Gateways (Privadas - ADMIN)
+- `GET /api/v1/gateways`: Lista os gateways cadastrados.
+- `PATCH /api/v1/gateways/:id`: Ativa/desativa ou altera a prioridade de um gateway.
+
+### 📦 Produtos (Privadas - ADMIN / MANAGER / FINANCE)
+- `GET /api/v1/products`: Lista todos os produtos.
+- `POST /api/v1/products`: Cadastra novo produto.
+- `PATCH /api/v1/products/:id`: Atualiza dados do produto.
+- `DELETE /api/v1/products/:id`: Remove um produto.
+
+### 👥 Usuários (Privadas - ADMIN / MANAGER)
+- `GET /api/v1/users`: Lista usuários do sistema.
+- `POST /api/v1/users`: Cria novo usuário com Role.
+- `PATCH /api/v1/users/:id`: Atualiza dados do usuário.
+- `DELETE /api/v1/users/:id`: Remove um usuário.
+
+### 👤 Clientes (Privadas - ADMIN / MANAGER / FINANCE)
+- `GET /api/v1/clients`: Lista todos os clientes.
+- `GET /api/v1/clients/:id`: Detalhes do cliente e seu histórico completo de compras.
 
 ---
 Desenvolvido com ❤️ para o teste prático BeTalent.

@@ -31,4 +31,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_USER: Env.schema.string(),
   DB_PASSWORD: Env.schema.string(),
   DB_DATABASE: Env.schema.string(),
+
+  // Gateways (Opcionais com valor default para evitar quebra no boot)
+  GATEWAY_1_URL: Env.schema.string.optional({ format: 'url', tld: false }),
+  GATEWAY_1_EMAIL: Env.schema.string.optional(),
+  GATEWAY_1_TOKEN: Env.schema.string.optional(),
+
+  GATEWAY_2_URL: Env.schema.string.optional({ format: 'url', tld: false }),
+  GATEWAY_2_TOKEN: Env.schema.string.optional(),
+  GATEWAY_2_SECRET: Env.schema.string.optional(),
 })
